@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #uploadForm, #chatForm { margin: 20px; }
+        #chatBox { border: 1px solid #ccc; padding: 10px; width: 300px; height: 200px; overflow-y: scroll; }
+        #chatBox div { margin-bottom: 10px; }
+        #chatBox .user { color: blue; }
+        #chatBox .bot { color: green; }
+    </style>
+</head>
+<body>
+<div id="uploadForm">
+    <h2>Upload Document</h2>
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload</button>
+    <br><br>
+    <textarea id="textInput" rows="4" cols="50" placeholder="Enter text here"></textarea>
+    <button onclick="uploadText()">Upload Text</button>
+</div>
+
+<div id="chatForm">
+    <h2>Chat</h2>
+    <div id="chatBox"></div>
+    <input type="text" id="chatInput">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/api/upload/file', {
+            method: 'POST',
+            body: formData
+        }).then(response => response.text()).then(data => {
+            alert(data);
+        });
+    }
+
+    function uploadText() {
+        const textInput = document.getElementById('textInput').value;
+        fetch('/api/upload/text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `text=${encodeURIComponent(textInput)}`
+        }).then(response => response.text()).then(data => {
+            alert(data);
+        });
+    }
+
+    function sendMessage() {
+        const chatInput = document.getElementById('chatInput').value;
+        fetch('/api/chat/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `query=${encodeURIComponent(chatInput)}`
+        }).then(response => response.text()).then(data => {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="user"><strong>User:</strong> ${chatInput}</div>`;
+            chatBox.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data}</div>`;
+            document.getElementById('chatInput').value = '';
+        });
+    }
+</script>
+</body>
+</html>
